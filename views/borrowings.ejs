@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wypożyczenia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <a class="navbar-brand" href="/books">Biblioteka</a>
+    <div class="ml-auto">
+        <% if (user) { %>
+            <span class="navbar-text me-2">Zalogowano jako: <strong><%= user.username %></strong></span>
+            <a href="/auth/logout" class="btn btn-danger">Wyloguj</a>
+        <% } else { %>
+            <a href="/auth/login" class="btn btn-primary">Zaloguj</a>
+        <% } %>
+    </div>
+</nav>
+
+
+
+<h1>Lista Wypożyczeń</h1>
+
+<% if (user.role === 'admin') { %>
+    <a href="/users" class="btn btn-info mb-3">Zarządzanie użytkownikami</a>
+<% } %>
+
+<ul class="list-group">
+    <% borrowings.forEach(borrowing => { %>
+        <li class="list-group-item">
+            <strong>Książka:</strong> <%= borrowing.title %> |
+            <% if (user.role === 'admin') { %>
+                <strong>Użytkownik:</strong> <%= borrowing.username %> |
+            <% } %>
+            <strong>Data wypożyczenia:</strong> <%= borrowing.borrowed_at %> |
+            <strong>Termin zwrotu:</strong> <%= borrowing.due_date %> |
+            <% if (borrowing.returned_at) { %>
+                <strong>Data zwrotu:</strong> <%= borrowing.returned_at %>
+            <% } else if (user.role === 'admin') { %>
+                <form action="/borrowings/return" method="POST" style="display:inline;">
+                    <input type="hidden" name="borrowing_id" value="<%= borrowing.borrowing_id %>">
+                    <button type="submit" class="btn btn-danger btn-sm">Zwróć</button>
+                </form>
+            <% } %>
+        </li>
+    <% }); %>
+</ul>
+
+<nav class="mt-4">
+    <ul class="pagination">
+        <% if (page > 1) { %>
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= page - 1 %>">Poprzednia</a>
+            </li>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === page ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+        <% } %>
+
+        <% if (page < totalPages) { %>
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= page + 1 %>">Następna</a>
+            </li>
+        <% } %>
+    </ul>
+</nav>
+
+
+<h2 class="mt-4">Dodaj Wypożyczenie</h2>
+<form id="borrowForm" action="/borrowings" method="POST" class="needs-validation" novalidate>
+    <% if (user.role === 'admin') { %>
+        <div class="mb-3">
+            <label class="form-label">ID Użytkownika:</label>
+            <input type="number" class="form-control" name="user_id" required value="<%= user_id || '' %>">
+            <div class="invalid-feedback">ID użytkownika jest wymagane.</div>
+        </div>
+    <% } %>
+
+    <div class="mb-3">
+        <label class="form-label">ID Książki:</label>
+        <input type="number" class="form-control" name="book_id" required value="<%= book_id || '' %>">
+        <div class="invalid-feedback">ID książki jest wymagane.</div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Termin zwrotu:</label>
+        <input type="date" class="form-control" name="due_date" required value="<%= due_date || '' %>">
+        <div class="invalid-feedback">Podaj poprawny termin zwrotu.</div>
+    </div>
+
+    <button type="submit" class="btn btn-warning">Dodaj</button>
+</form>
+
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger mt-3">
+        <ul>
+            <% errors.forEach(error => { %>
+                <li><%= error.msg %></li>
+            <% }); %>
+        </ul>
+    </div>
+<% } %>
+
+<a href="/books" class="btn btn-primary mt-3">Przejdź do listy książek</a>
+
+<script>
+    (function () {
+        'use strict';
+        document.getElementById('borrowForm').addEventListener('submit', function (event) {
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            this.classList.add('was-validated');
+        }, false);
+    })();
+</script>
+</body>
+</html>
