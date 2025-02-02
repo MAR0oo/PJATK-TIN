@@ -99,6 +99,9 @@ router.post(
     ],
     async (req, res) => {
         const errors = validationResult(req);
+        const page = parseInt(req.query.page) || 1;
+        const totalPages = 1; // Default value in case of error
+
         if (!errors.isEmpty()) {
             return res.status(400).render('borrowings', {
                 borrowings: [],
@@ -106,7 +109,9 @@ router.post(
                 errors: errors.array(),
                 book_id: req.body.book_id,
                 due_date: req.body.due_date,
-                user_id: req.body.user_id || ''
+                user_id: req.body.user_id || '',
+                page, // Ensure page is always defined
+                totalPages // Ensure totalPages is always defined
             });
         }
 
@@ -126,6 +131,7 @@ router.post(
         }
     }
 );
+
 
 router.post('/return', ensureAuthenticated, ensureAdmin, async (req, res) => {
     const { borrowing_id } = req.body;
