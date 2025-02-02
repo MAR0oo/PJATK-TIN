@@ -5,7 +5,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var pool = require('./db'); // Import puli połączeń
+var pool = require('./db');
 
 var indexRouter = require('./routes/index');
 var booksRouter = require('./routes/books');
@@ -21,10 +21,10 @@ const session = require('express-session');
 
 app.use(
     session({
-      secret: 'biblioteka-sekret', // Zmień na silny sekret w produkcji
+      secret: 'biblioteka-sekret',
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: false }, // Ustaw na true w przypadku HTTPS
+      cookie: { secure: false },
     })
 );
 
